@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="TeXportLab renders LaTeX equations with MathJax and exports them as SVG or PNG images."
+    />
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <title>TeXportLab</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="app-header" aria-labelledby="app-title">
+        <div class="brand-wordmark">
+          <h1 id="app-title" aria-label="TeXportLab">
+            <span class="brand-text">T</span><span class="brand-e" aria-hidden="true">
+              <svg viewBox="0 0 100 100" role="img">
+                <path
+                  class="brand-e-black"
+                  d="M55 14C30 14 12 31 12 55C12 80 31 96 56 96C74 96 88 88 95 73H72C68 77 63 79 56 79C45 79 37 73 34 63H96C98 33 80 14 55 14ZM35 45C38 36 45 31 55 31C65 31 72 36 75 45H35Z"
+                />
+              </svg>
+            </span><span class="brand-x" aria-hidden="true">
+              <svg viewBox="0 0 114 100" role="img">
+                <path class="brand-x-black" d="M6 10H36L72 50L36 90H6L42 50Z" transform="translate(114 0) scale(-1 1)" />
+                <path class="brand-x-red" d="M6 10H36L72 50L36 90H6L42 50Z" />
+              </svg>
+            </span><span class="brand-text">portLab</span>
+          </h1>
+          <p>LaTeX equations exported as SVG and PNG.</p>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Equation editor and preview">
+        <section class="panel input-panel" aria-labelledby="input-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="input-title">LaTeX Input</h2>
+            </div>
+          </div>
+
+          <div class="editor-toolbar" aria-label="Formatting tools">
+            <button id="tool-bold-button" class="tool-button" type="button" aria-label="Toggle bold symbol" title="Bold symbol">
+              <strong aria-hidden="true">B</strong>
+            </button>
+            <button id="tool-roman-button" class="tool-button" type="button" aria-label="Toggle upright roman" title="Upright roman">
+              <span aria-hidden="true">rm</span>
+            </button>
+            <button id="tool-italic-button" class="tool-button" type="button" aria-label="Toggle italic" title="Italic">
+              <em aria-hidden="true">I</em>
+            </button>
+            <button
+              id="tool-wrapper-button"
+              class="tool-button"
+              type="button"
+              aria-label="Toggle WordPress scroll wrapper"
+              title="WordPress scroll wrapper"
+            >
+              <span aria-hidden="true">&lt;&gt;</span>
+            </button>
+          </div>
+
+          <textarea
+            id="latex-input"
+            class="latex-input"
+            spellcheck="false"
+            aria-label="LaTeX equation input"
+          >\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}</textarea>
+
+          <div class="actions-row">
+            <button id="copy-latex-button" class="button" type="button">Copy LaTeX</button>
+            <button id="open-samples-button" class="button primary" type="button">Samples</button>
+          </div>
+        </section>
+
+        <section class="panel preview-panel" aria-labelledby="preview-title">
+          <div class="panel-heading">
+            <div>
+              <h2 id="preview-title">Preview</h2>
+            </div>
+            <div id="render-state" class="render-state" role="status" aria-live="polite">Ready</div>
+          </div>
+
+          <div id="preview" class="preview" aria-live="polite">
+            <div class="preview-placeholder">Rendering...</div>
+          </div>
+
+          <div class="export-grid">
+            <div class="scale-control" role="radiogroup" aria-label="PNG scale">
+              <label>
+                <input type="radio" name="png-scale" value="1" checked />
+                <span>1x</span>
+              </label>
+              <label>
+                <input type="radio" name="png-scale" value="2" />
+                <span>2x</span>
+              </label>
+              <label>
+                <input type="radio" name="png-scale" value="4" />
+                <span>4x</span>
+              </label>
+            </div>
+            <div class="actions-row export-actions">
+              <button id="copy-png-button" class="button primary" type="button" disabled>Copy PNG</button>
+              <button
+                id="download-png-button"
+                class="button download-icon-button"
+                type="button"
+                aria-label="Download PNG"
+                title="Download PNG"
+                disabled
+              >
+                <svg class="download-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v11" />
+                  <path d="M7.5 9.5 12 14l4.5-4.5" />
+                  <path d="M5 13.5v5h14v-5" />
+                </svg>
+                <span>PNG</span>
+              </button>
+              <button
+                id="download-svg-button"
+                class="button download-icon-button"
+                type="button"
+                aria-label="Download SVG"
+                title="Download SVG"
+                disabled
+              >
+                <svg class="download-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v11" />
+                  <path d="M7.5 9.5 12 14l4.5-4.5" />
+                  <path d="M5 13.5v5h14v-5" />
+                </svg>
+                <span>SVG</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </section>
+
+      <p id="message" class="message" role="status" aria-live="polite"></p>
+    </main>
+
+    <div id="sample-modal" class="sample-modal" hidden>
+      <div class="sample-modal-backdrop" data-close-samples></div>
+      <section
+        class="sample-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="sample-dialog-title"
+      >
+        <header class="sample-dialog-header">
+          <div>
+            <h2 id="sample-dialog-title">Samples</h2>
+            <p>Choose a rendered equation and send its LaTeX to the editor.</p>
+          </div>
+          <button id="close-samples-button" class="button icon-button" type="button" aria-label="Close samples">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </header>
+
+        <div class="sample-browser">
+          <nav id="sample-categories" class="sample-categories" aria-label="Sample categories"></nav>
+          <div id="sample-list" class="sample-list" aria-live="polite"></div>
+        </div>
+      </section>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "texport",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A static web app for rendering LaTeX equations with MathJax and exporting them as SVG or PNG images.",
+  "type": "module",
+  "scripts": {
+    "predev": "node scripts/copy-mathjax.mjs",
+    "dev": "vite --host 127.0.0.1",
+    "prebuild": "node scripts/copy-mathjax.mjs",
+    "build": "tsc --noEmit && vite build",
+    "typecheck": "tsc --noEmit",
+    "preview": "vite preview --host 127.0.0.1"
+  },
+  "dependencies": {
+    "@mathjax/mathjax-newcm-font": "^4.0.0",
+    "mathjax": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12"
+  }
+}
