@@ -51,6 +51,21 @@
             <button id="tool-italic-button" class="tool-button" type="button" aria-label="Toggle italic" title="Italic">
               <em aria-hidden="true">I</em>
             </button>
+            <button id="tool-mathbf-button" class="tool-button" type="button" aria-label="Toggle math bold" title="Math bold">
+              <span aria-hidden="true">bf</span>
+            </button>
+            <button id="tool-mathbb-button" class="tool-button" type="button" aria-label="Toggle blackboard bold" title="Blackboard bold">
+              <span aria-hidden="true">bb</span>
+            </button>
+            <button id="tool-mathsf-button" class="tool-button" type="button" aria-label="Toggle sans serif" title="Sans serif">
+              <span aria-hidden="true">sf</span>
+            </button>
+            <button id="tool-mathcal-button" class="tool-button" type="button" aria-label="Toggle calligraphy" title="Calligraphy">
+              <span aria-hidden="true">cal</span>
+            </button>
+            <button id="tool-mathfrak-button" class="tool-button" type="button" aria-label="Toggle fraktur" title="Fraktur">
+              <span aria-hidden="true">fr</span>
+            </button>
             <button
               id="tool-wrapper-button"
               class="tool-button"
@@ -71,7 +86,8 @@
 
           <div class="actions-row">
             <button id="copy-latex-button" class="button" type="button">Copy LaTeX</button>
-            <button id="open-samples-button" class="button primary" type="button">Samples</button>
+            <button id="open-samples-button" class="button" type="button">Samples</button>
+            <button id="open-greek-button" class="button" type="button">Greek</button>
           </div>
         </section>
 
@@ -88,13 +104,23 @@
           </div>
 
           <div class="export-grid">
+            <div class="color-controls" aria-label="Preview colors">
+              <label class="color-control">
+                <span>font</span>
+                <input id="font-color-input" type="color" value="#000000" aria-label="Font color" />
+              </label>
+              <label class="color-control">
+                <span>background</span>
+                <input id="background-color-input" type="color" value="#ffffff" aria-label="Preview background color" />
+              </label>
+            </div>
             <div class="scale-control" role="radiogroup" aria-label="PNG scale">
               <label>
-                <input type="radio" name="png-scale" value="1" checked />
+                <input type="radio" name="png-scale" value="1" />
                 <span>1x</span>
               </label>
               <label>
-                <input type="radio" name="png-scale" value="2" />
+                <input type="radio" name="png-scale" value="2" checked />
                 <span>2x</span>
               </label>
               <label>
@@ -103,7 +129,7 @@
               </label>
             </div>
             <div class="actions-row export-actions">
-              <button id="copy-png-button" class="button primary" type="button" disabled>Copy PNG</button>
+              <button id="copy-png-button" class="button" type="button" disabled>Copy PNG</button>
               <button
                 id="download-png-button"
                 class="button download-icon-button"
@@ -164,6 +190,28 @@
           <nav id="sample-categories" class="sample-categories" aria-label="Sample categories"></nav>
           <div id="sample-list" class="sample-list" aria-live="polite"></div>
         </div>
+      </section>
+    </div>
+
+    <div id="greek-modal" class="sample-modal" hidden>
+      <div class="sample-modal-backdrop" data-close-greek></div>
+      <section
+        class="sample-dialog greek-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="greek-dialog-title"
+      >
+        <header class="sample-dialog-header">
+          <div>
+            <h2 id="greek-dialog-title">Greek Letters</h2>
+            <p>Choose a rendered Greek symbol and insert its LaTeX at the editor cursor.</p>
+          </div>
+          <button id="close-greek-button" class="button icon-button" type="button" aria-label="Close Greek letters">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </header>
+
+        <div id="greek-list" class="sample-list greek-list" aria-live="polite"></div>
       </section>
     </div>
 

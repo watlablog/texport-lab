@@ -1,33 +1,47 @@
 import './style.css';
 import { createPngBlob, downloadPng, downloadSvg } from './exportImage';
+import { greekLetters, type GreekLetter } from './greekLetters';
 import { renderLatexToSvg } from './mathjax';
 import { sampleCategories, type LatexSample, type LatexSampleCategory } from './samples';
 
 const RENDER_DEBOUNCE_MS = 300;
+const PREVIEW_SCALE_PROPERTY = '--preview-font-size';
 
 const latexInput = getElement('latex-input', HTMLTextAreaElement);
 const copyLatexButton = getElement('copy-latex-button', HTMLButtonElement);
 const openSamplesButton = getElement('open-samples-button', HTMLButtonElement);
 const closeSamplesButton = getElement('close-samples-button', HTMLButtonElement);
+const openGreekButton = getElement('open-greek-button', HTMLButtonElement);
+const closeGreekButton = getElement('close-greek-button', HTMLButtonElement);
 const toolBoldButton = getElement('tool-bold-button', HTMLButtonElement);
 const toolRomanButton = getElement('tool-roman-button', HTMLButtonElement);
 const toolItalicButton = getElement('tool-italic-button', HTMLButtonElement);
+const toolMathbfButton = getElement('tool-mathbf-button', HTMLButtonElement);
+const toolMathbbButton = getElement('tool-mathbb-button', HTMLButtonElement);
+const toolMathsfButton = getElement('tool-mathsf-button', HTMLButtonElement);
+const toolMathcalButton = getElement('tool-mathcal-button', HTMLButtonElement);
+const toolMathfrakButton = getElement('tool-mathfrak-button', HTMLButtonElement);
 const toolWrapperButton = getElement('tool-wrapper-button', HTMLButtonElement);
 const copyPngButton = getElement('copy-png-button', HTMLButtonElement);
 const downloadSvgButton = getElement('download-svg-button', HTMLButtonElement);
 const downloadPngButton = getElement('download-png-button', HTMLButtonElement);
+const fontColorInput = getElement('font-color-input', HTMLInputElement);
+const backgroundColorInput = getElement('background-color-input', HTMLInputElement);
 const preview = getElement('preview', HTMLDivElement);
 const message = getElement('message', HTMLParagraphElement);
 const renderState = getElement('render-state', HTMLDivElement);
 const sampleModal = getElement('sample-modal', HTMLDivElement);
 const sampleCategoriesElement = getElement('sample-categories', HTMLElement);
 const sampleList = getElement('sample-list', HTMLDivElement);
+const greekModal = getElement('greek-modal', HTMLDivElement);
+const greekList = getElement('greek-list', HTMLDivElement);
 
 let renderTimer: number | undefined;
 let renderToken = 0;
 let currentSvg: SVGElement | null = null;
 let selectedCategoryId = sampleCategories[0]?.id ?? '';
 let samplePreviewToken = 0;
+let greekPreviewToken = 0;
 let focusedBeforeModal: HTMLElement | null = null;
 let lastEditorSelection = { start: latexInput.value.length, end: latexInput.value.length };
 
@@ -161,7 +175,17 @@ function getToolbarTargetRange(): { start: number; end: number; selectedText: st
   };
 }
 
-function toggleCommand(command: 'boldsymbol' | 'mathrm' | 'mathit'): void {
+type ToggleCommand =
+  | 'boldsymbol'
+  | 'mathrm'
+  | 'mathit'
+  | 'mathbf'
+  | 'mathbb'
+  | 'mathsf'
+  | 'mathcal'
+  | 'mathfrak';
+
+function toggleCommand(command: ToggleCommand): void {
   normalizeLatexInput();
   const { start, end, selectedText } = getToolbarTargetRange();
   const inner = unwrapOuterCommand(selectedText, command);
@@ -199,17 +223,27 @@ function getStoredEditorRange(): { start: number; end: number } {
   };
 }
 
-function insertSampleLatex(latex: string): void {
+function insertLatexAtStoredRange(latex: string): void {
   normalizeLatexInput();
   const { start, end } = getStoredEditorRange();
 
   latexInput.setRangeText(latex, start, end, 'select');
-  closeSampleModal(false);
   latexInput.focus();
   latexInput.setSelectionRange(start, start + latex.length);
   updateLastEditorSelection();
   void renderNow();
+}
+
+function insertSampleLatex(latex: string): void {
+  insertLatexAtStoredRange(latex);
+  closeSampleModal(false);
   setMessage('Sample inserted.', 'success');
+}
+
+function insertGreekLatex(latex: string): void {
+  insertLatexAtStoredRange(latex);
+  closeGreekModal(false);
+  setMessage('Greek letter inserted.', 'success');
 }
 
 function toggleWordPressWrapper(): void {
@@ -286,9 +320,28 @@ function getSelectedPngScale(): number {
   return [1, 2, 4].includes(scale) ? scale : 1;
 }
 
+function updatePreviewScale(): void {
+  preview.style.setProperty(PREVIEW_SCALE_PROPERTY, `${getSelectedPngScale() * 100}%`);
+}
+
+function getSelectedFontColor(): string {
+  return fontColorInput.value || '#000000';
+}
+
+function getSelectedBackgroundColor(): string {
+  return backgroundColorInput.value || '#ffffff';
+}
+
+function updatePreviewColors(): void {
+  preview.style.setProperty('--preview-font-color', getSelectedFontColor());
+  preview.style.setProperty('--preview-background-color', getSelectedBackgroundColor());
+}
+
 async function renderNow(): Promise<void> {
   window.clearTimeout(renderTimer);
   normalizeLatexInput();
+  updatePreviewScale();
+  updatePreviewColors();
   const token = ++renderToken;
   const source = latexInput.value.trim();
 
@@ -403,7 +456,7 @@ async function handlePngCopy(): Promise<void> {
   setMessage('Preparing PNG...');
 
   try {
-    const pngBlob = await createPngBlob(currentSvg, getSelectedPngScale());
+    const pngBlob = await createPngBlob(currentSvg, getSelectedPngScale(), getSelectedFontColor());
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
     setMessage('PNG copied. Paste it with Ctrl+V or Command+V.', 'success');
   } catch (error) {
@@ -423,7 +476,7 @@ async function handlePngDownload(): Promise<void> {
   setMessage('Preparing PNG...');
 
   try {
-    await downloadPng(currentSvg, 'texport-equation.png', getSelectedPngScale());
+    await downloadPng(currentSvg, 'texport-equation.png', getSelectedPngScale(), getSelectedFontColor());
     setMessage('PNG download started.', 'success');
   } catch (error) {
     setMessage(getErrorMessage(error), 'error');
@@ -439,7 +492,7 @@ function handleSvgDownload(): void {
   }
 
   try {
-    downloadSvg(currentSvg, 'texport-equation.svg');
+    downloadSvg(currentSvg, 'texport-equation.svg', getSelectedFontColor());
     setMessage('SVG download started.', 'success');
   } catch (error) {
     setMessage(getErrorMessage(error), 'error');
@@ -566,16 +619,111 @@ async function renderSamplePreviews(category: LatexSampleCategory, token: number
   }
 }
 
+function createGreekCard(letter: GreekLetter): HTMLElement {
+  const card = document.createElement('article');
+  const button = document.createElement('button');
+  const content = document.createElement('span');
+  const previewSlot = document.createElement('span');
+  const text = document.createElement('span');
+  const label = document.createElement('span');
+  const code = document.createElement('code');
+
+  card.className = 'sample-card greek-card';
+  card.dataset.greekId = letter.id;
+  button.type = 'button';
+  button.className = 'sample-select-button';
+
+  previewSlot.className = 'sample-preview greek-preview';
+  previewSlot.textContent = 'Rendering...';
+
+  content.className = 'sample-card-content greek-card-content';
+  label.className = 'sample-card-label';
+  label.textContent = letter.label;
+  code.className = 'sample-code';
+  code.textContent = letter.latex;
+  text.className = 'sample-card-text';
+  text.append(label, code);
+
+  content.append(previewSlot, text);
+  button.append(content);
+  card.append(button);
+
+  if (letter.note) {
+    const note = document.createElement('span');
+
+    note.className = 'sample-note';
+    note.textContent = letter.note;
+    card.append(note);
+  }
+
+  const selectLetter = () => {
+    insertGreekLatex(letter.latex);
+  };
+
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    selectLetter();
+  });
+  card.addEventListener('click', (event) => {
+    event.stopPropagation();
+    selectLetter();
+  });
+
+  return card;
+}
+
+function mountGreekList(): void {
+  const fragment = document.createDocumentFragment();
+
+  greekPreviewToken += 1;
+  for (const letter of greekLetters) {
+    fragment.append(createGreekCard(letter));
+  }
+
+  greekList.replaceChildren(fragment);
+  void renderGreekPreviews(greekPreviewToken);
+}
+
+async function renderGreekPreviews(token: number): Promise<void> {
+  for (const letter of greekLetters) {
+    if (token !== greekPreviewToken || greekModal.hidden) {
+      return;
+    }
+
+    const card = greekList.querySelector<HTMLButtonElement>(`.greek-card[data-greek-id="${letter.id}"]`);
+    const previewSlot = card?.querySelector<HTMLElement>('.greek-preview');
+
+    if (!previewSlot) {
+      continue;
+    }
+
+    try {
+      const svg = await renderLatexToSvg(letter.latex, previewSlot);
+
+      if (token !== greekPreviewToken) {
+        return;
+      }
+
+      svg.classList.add('sample-equation-svg');
+      previewSlot.replaceChildren(svg);
+    } catch {
+      previewSlot.textContent = 'Preview failed';
+    }
+  }
+}
+
 function getFocusableModalElements(): HTMLElement[] {
+  const activeModal = sampleModal.hidden ? greekModal : sampleModal;
+
   return Array.from(
-    sampleModal.querySelectorAll<HTMLElement>(
+    activeModal.querySelectorAll<HTMLElement>(
       'button, [href], input, textarea, select, [tabindex]:not([tabindex="-1"])',
     ),
   ).filter((element) => !element.hasAttribute('disabled') && element.offsetParent !== null);
 }
 
 function trapModalFocus(event: KeyboardEvent): void {
-  if (event.key !== 'Tab' || sampleModal.hidden) {
+  if (event.key !== 'Tab' || (sampleModal.hidden && greekModal.hidden)) {
     return;
   }
 
@@ -600,6 +748,7 @@ function trapModalFocus(event: KeyboardEvent): void {
 function openSampleModal(): void {
   updateLastEditorSelection();
   focusedBeforeModal = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  greekModal.hidden = true;
   sampleModal.hidden = false;
   document.body.classList.add('modal-open');
   mountSampleCategories();
@@ -617,6 +766,26 @@ function closeSampleModal(restoreFocus = true): void {
   }
 }
 
+function openGreekModal(): void {
+  updateLastEditorSelection();
+  focusedBeforeModal = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  sampleModal.hidden = true;
+  greekModal.hidden = false;
+  document.body.classList.add('modal-open');
+  mountGreekList();
+  closeGreekButton.focus();
+}
+
+function closeGreekModal(restoreFocus = true): void {
+  greekPreviewToken += 1;
+  greekModal.hidden = true;
+  document.body.classList.remove('modal-open');
+
+  if (restoreFocus) {
+    focusedBeforeModal?.focus();
+  }
+}
+
 latexInput.addEventListener('input', () => {
   updateLastEditorSelection();
   scheduleRender();
@@ -627,20 +796,41 @@ latexInput.addEventListener('select', updateLastEditorSelection);
 toolBoldButton.addEventListener('click', () => toggleCommand('boldsymbol'));
 toolRomanButton.addEventListener('click', () => toggleCommand('mathrm'));
 toolItalicButton.addEventListener('click', () => toggleCommand('mathit'));
+toolMathbfButton.addEventListener('click', () => toggleCommand('mathbf'));
+toolMathbbButton.addEventListener('click', () => toggleCommand('mathbb'));
+toolMathsfButton.addEventListener('click', () => toggleCommand('mathsf'));
+toolMathcalButton.addEventListener('click', () => toggleCommand('mathcal'));
+toolMathfrakButton.addEventListener('click', () => toggleCommand('mathfrak'));
 toolWrapperButton.addEventListener('click', toggleWordPressWrapper);
 copyLatexButton.addEventListener('click', () => {
   void copyLatex();
 });
 openSamplesButton.addEventListener('click', openSampleModal);
 closeSamplesButton.addEventListener('click', () => closeSampleModal());
+openGreekButton.addEventListener('click', openGreekModal);
+closeGreekButton.addEventListener('click', () => closeGreekModal());
 sampleModal.addEventListener('click', (event) => {
   if ((event.target as HTMLElement).hasAttribute('data-close-samples')) {
     closeSampleModal();
   }
 });
+greekModal.addEventListener('click', (event) => {
+  if ((event.target as HTMLElement).hasAttribute('data-close-greek')) {
+    closeGreekModal();
+  }
+});
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && !sampleModal.hidden) {
-    closeSampleModal();
+  if (event.key === 'Escape') {
+    if (!sampleModal.hidden) {
+      closeSampleModal();
+      return;
+    }
+
+    if (!greekModal.hidden) {
+      closeGreekModal();
+      return;
+    }
+
     return;
   }
 
@@ -653,5 +843,12 @@ downloadSvgButton.addEventListener('click', handleSvgDownload);
 downloadPngButton.addEventListener('click', () => {
   void handlePngDownload();
 });
+document.querySelectorAll<HTMLInputElement>('input[name="png-scale"]').forEach((input) => {
+  input.addEventListener('change', updatePreviewScale);
+});
+fontColorInput.addEventListener('input', updatePreviewColors);
+backgroundColorInput.addEventListener('input', updatePreviewColors);
 
+updatePreviewScale();
+updatePreviewColors();
 void renderNow();

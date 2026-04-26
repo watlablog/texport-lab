@@ -16,6 +16,12 @@ type StandaloneSvg = {
   height: number;
 };
 
+type StandaloneSvgOptions = {
+  paddingPx?: number;
+  includeBackground?: boolean;
+  color?: string;
+};
+
 function parseViewBox(value: string | null): SvgBox | null {
   if (!value) {
     return null;
@@ -85,7 +91,8 @@ function readRenderedSize(svg: SVGElement, fallbackBox: SvgBox): { width: number
   };
 }
 
-function createStandaloneSvg(svg: SVGElement, paddingPx = DEFAULT_PADDING_PX): StandaloneSvg {
+function createStandaloneSvg(svg: SVGElement, options: StandaloneSvgOptions = {}): StandaloneSvg {
+  const { paddingPx = DEFAULT_PADDING_PX, includeBackground = false, color = '#111111' } = options;
   const source = svg.cloneNode(true) as SVGElement;
   const box = readSvgBox(svg);
   const renderedSize = readRenderedSize(svg, box);
@@ -99,21 +106,24 @@ function createStandaloneSvg(svg: SVGElement, paddingPx = DEFAULT_PADDING_PX): S
   };
   const outputWidth = Math.max(1, Math.ceil(renderedSize.width + paddingPx * 2));
   const outputHeight = Math.max(1, Math.ceil(renderedSize.height + paddingPx * 2));
-  const background = document.createElementNS(SVG_NS, 'rect');
 
   source.removeAttribute('style');
   source.setAttribute('xmlns', SVG_NS);
   source.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.width} ${viewBox.height}`);
   source.setAttribute('width', String(outputWidth));
   source.setAttribute('height', String(outputHeight));
-  source.setAttribute('color', '#111111');
+  source.setAttribute('color', color);
 
-  background.setAttribute('x', String(viewBox.x));
-  background.setAttribute('y', String(viewBox.y));
-  background.setAttribute('width', String(viewBox.width));
-  background.setAttribute('height', String(viewBox.height));
-  background.setAttribute('fill', '#ffffff');
-  source.insertBefore(background, source.firstChild);
+  if (includeBackground) {
+    const background = document.createElementNS(SVG_NS, 'rect');
+
+    background.setAttribute('x', String(viewBox.x));
+    background.setAttribute('y', String(viewBox.y));
+    background.setAttribute('width', String(viewBox.width));
+    background.setAttribute('height', String(viewBox.height));
+    background.setAttribute('fill', '#ffffff');
+    source.insertBefore(background, source.firstChild);
+  }
 
   const serialized = new XMLSerializer().serializeToString(source);
 
@@ -163,19 +173,23 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-export function serializeSvg(svgElement: SVGElement): string {
-  return createStandaloneSvg(svgElement).text;
+export function serializeSvg(svgElement: SVGElement, color = '#111111'): string {
+  return createStandaloneSvg(svgElement, { color }).text;
 }
 
-export function downloadSvg(svgElement: SVGElement, filename = SVG_FILENAME): void {
-  const svgText = serializeSvg(svgElement);
+export function downloadSvg(svgElement: SVGElement, filename = SVG_FILENAME, color = '#111111'): void {
+  const svgText = serializeSvg(svgElement, color);
   const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
   downloadBlob(blob, filename);
 }
 
-export async function createPngBlob(svgElement: SVGElement, scale = 1): Promise<Blob> {
+export async function createPngBlob(svgElement: SVGElement, scale = 1, color = '#111111'): Promise<Blob> {
   const normalizedScale = [1, 2, 4].includes(scale) ? scale : 1;
-  const standaloneSvg = createStandaloneSvg(svgElement);
+  const standaloneSvg = createStandaloneSvg(svgElement, {
+    color,
+    includeBackground: false,
+    paddingPx: DEFAULT_PADDING_PX,
+  });
   const svgBlob = new Blob([standaloneSvg.text], { type: 'image/svg+xml;charset=utf-8' });
   const svgUrl = URL.createObjectURL(svgBlob);
 
@@ -191,8 +205,6 @@ export async function createPngBlob(svgElement: SVGElement, scale = 1): Promise<
     canvas.width = Math.max(1, Math.round(standaloneSvg.width * normalizedScale));
     canvas.height = Math.max(1, Math.round(standaloneSvg.height * normalizedScale));
     context.scale(normalizedScale, normalizedScale);
-    context.fillStyle = '#ffffff';
-    context.fillRect(0, 0, standaloneSvg.width, standaloneSvg.height);
     context.drawImage(image, 0, 0, standaloneSvg.width, standaloneSvg.height);
 
     return await canvasToBlob(canvas);
@@ -205,7 +217,8 @@ export async function downloadPng(
   svgElement: SVGElement,
   filename = PNG_FILENAME,
   scale = 1,
+  color = '#111111',
 ): Promise<void> {
-  const pngBlob = await createPngBlob(svgElement, scale);
+  const pngBlob = await createPngBlob(svgElement, scale, color);
   downloadBlob(pngBlob, filename);
 }

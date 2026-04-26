@@ -1,0 +1,51 @@
+export type GreekLetter = {
+  id: string;
+  label: string;
+  latex: string;
+  note?: string;
+};
+
+export const greekLetters: GreekLetter[] = [
+  { id: 'alpha', label: 'alpha', latex: '\\alpha' },
+  { id: 'beta', label: 'beta', latex: '\\beta' },
+  { id: 'gamma', label: 'gamma', latex: '\\gamma' },
+  { id: 'gamma-uppercase', label: 'Gamma', latex: '\\Gamma' },
+  { id: 'delta', label: 'delta', latex: '\\delta' },
+  { id: 'delta-uppercase', label: 'Delta', latex: '\\Delta' },
+  { id: 'epsilon', label: 'epsilon', latex: '\\epsilon' },
+  { id: 'varepsilon', label: 'epsilon variant', latex: '\\varepsilon' },
+  { id: 'zeta', label: 'zeta', latex: '\\zeta' },
+  { id: 'eta', label: 'eta', latex: '\\eta' },
+  { id: 'theta', label: 'theta', latex: '\\theta' },
+  { id: 'vartheta', label: 'theta variant', latex: '\\vartheta' },
+  { id: 'theta-uppercase', label: 'Theta', latex: '\\Theta' },
+  { id: 'iota', label: 'iota', latex: '\\iota' },
+  { id: 'kappa', label: 'kappa', latex: '\\kappa' },
+  { id: 'varkappa', label: 'kappa variant', latex: '\\varkappa' },
+  { id: 'lambda', label: 'lambda', latex: '\\lambda' },
+  { id: 'lambda-uppercase', label: 'Lambda', latex: '\\Lambda' },
+  { id: 'mu', label: 'mu', latex: '\\mu' },
+  { id: 'nu', label: 'nu', latex: '\\nu' },
+  { id: 'xi', label: 'xi', latex: '\\xi' },
+  { id: 'xi-uppercase', label: 'Xi', latex: '\\Xi' },
+  { id: 'omicron', label: 'omicron', latex: 'o', note: 'Standard LaTeX uses Latin o for omicron.' },
+  { id: 'pi', label: 'pi', latex: '\\pi' },
+  { id: 'varpi', label: 'pi variant', latex: '\\varpi' },
+  { id: 'pi-uppercase', label: 'Pi', latex: '\\Pi' },
+  { id: 'rho', label: 'rho', latex: '\\rho' },
+  { id: 'varrho', label: 'rho variant', latex: '\\varrho' },
+  { id: 'sigma', label: 'sigma', latex: '\\sigma' },
+  { id: 'varsigma', label: 'sigma final', latex: '\\varsigma' },
+  { id: 'sigma-uppercase', label: 'Sigma', latex: '\\Sigma' },
+  { id: 'tau', label: 'tau', latex: '\\tau' },
+  { id: 'upsilon', label: 'upsilon', latex: '\\upsilon' },
+  { id: 'upsilon-uppercase', label: 'Upsilon', latex: '\\Upsilon' },
+  { id: 'phi', label: 'phi', latex: '\\phi' },
+  { id: 'varphi', label: 'phi variant', latex: '\\varphi' },
+  { id: 'phi-uppercase', label: 'Phi', latex: '\\Phi' },
+  { id: 'chi', label: 'chi', latex: '\\chi' },
+  { id: 'psi', label: 'psi', latex: '\\psi' },
+  { id: 'psi-uppercase', label: 'Psi', latex: '\\Psi' },
+  { id: 'omega', label: 'omega', latex: '\\omega' },
+  { id: 'omega-uppercase', label: 'Omega', latex: '\\Omega' },
+];
