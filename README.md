@@ -1,6 +1,6 @@
-# TeXport
+# TeXportLab
 
-TeXport is a small static web app for rendering LaTeX equations with MathJax and exporting them as SVG or PNG images.
+TeXportLab is a small static web app for rendering LaTeX equations with MathJax and exporting them as SVG or PNG images.
 
 - No backend
 - No login
@@ -8,6 +8,55 @@ TeXport is a small static web app for rendering LaTeX equations with MathJax and
 - No CDN dependency
 - MathJax bundled via npm
 - SVG and PNG export
+
+## How to Use
+
+Type a LaTeX equation in the editor. TeXportLab renders automatically after a short delay, so there is no manual render button.
+
+You can write a plain equation such as:
+
+```tex
+\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+```
+
+Display delimiters such as `$$...$$`, `\[...\]`, and `\(...\)` are accepted and stripped before rendering. The editor also normalizes macOS/Japanese `¥` and `￥` characters to `\`.
+
+### Insert Symbols and Samples
+
+- `Samples` opens a categorized LaTeX sample browser. Choose a rendered sample to insert its LaTeX at the current cursor position or replace the selected range.
+- `Greek` opens a Greek-letter browser in the official Greek alphabet order. Choose a letter to insert its LaTeX command.
+- Sample insertion does not replace the whole editor unless the whole editor is selected.
+
+### Formatting Toolbar
+
+Select text in the editor, then use the toolbar above the input:
+
+- `B`: wrap with `\boldsymbol{...}` for bold symbols, including Greek letters.
+- `rm`: wrap with `\mathrm{...}`.
+- `I`: wrap with `\mathit{...}`.
+- `bf`: wrap with `\mathbf{...}`.
+- `bb`: wrap with `\mathbb{...}`.
+- `sf`: wrap with `\mathsf{...}`.
+- `cal`: wrap with `\mathcal{...}`.
+- `fr`: wrap with `\mathfrak{...}`.
+- `<>`: wrap with a WordPress-friendly horizontal scroll container.
+
+Clicking the same toolbar button on an already wrapped selection removes that wrapper.
+
+### Preview Colors and Scale
+
+Use the preview controls to adjust:
+
+- `font`: changes the rendered equation color. This color is included in SVG and PNG exports.
+- `background`: changes only the preview background. Exported SVG and PNG files keep a transparent background.
+- `1x / 2x / 4x`: changes the preview size and PNG export scale. The default is `2x`.
+
+### Export
+
+- `Copy LaTeX`: copies the editor contents as text.
+- `Copy PNG`: copies a transparent-background PNG to the clipboard. This requires localhost or HTTPS and a browser with image clipboard support.
+- `PNG`: downloads a transparent-background PNG.
+- `SVG`: downloads a transparent-background SVG.
 
 ## Development
 

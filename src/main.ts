@@ -84,7 +84,7 @@ function parseEditorContent(text: string): ParsedEditorContent {
   }
 
   if (/<\/?[a-z][\s\S]*>/i.test(trimmed)) {
-    throw new Error('Only the TeXport WordPress scroll wrapper is supported as HTML input.');
+    throw new Error('Only the TeXportLab WordPress scroll wrapper is supported as HTML input.');
   }
 
   return { kind: 'latex', latex: trimmed };
