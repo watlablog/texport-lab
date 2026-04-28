@@ -8,6 +8,7 @@ const RENDER_DEBOUNCE_MS = 300;
 const PREVIEW_SCALE_PROPERTY = '--preview-font-size';
 
 const latexInput = getElement('latex-input', HTMLTextAreaElement);
+const appVersion = getElement('app-version', HTMLSpanElement);
 const copyLatexButton = getElement('copy-latex-button', HTMLButtonElement);
 const openSamplesButton = getElement('open-samples-button', HTMLButtonElement);
 const closeSamplesButton = getElement('close-samples-button', HTMLButtonElement);
@@ -847,8 +848,11 @@ document.querySelectorAll<HTMLInputElement>('input[name="png-scale"]').forEach((
   input.addEventListener('change', updatePreviewScale);
 });
 fontColorInput.addEventListener('input', updatePreviewColors);
+fontColorInput.addEventListener('change', updatePreviewColors);
 backgroundColorInput.addEventListener('input', updatePreviewColors);
+backgroundColorInput.addEventListener('change', updatePreviewColors);
 
 updatePreviewScale();
 updatePreviewColors();
+appVersion.textContent = `v${__APP_VERSION__}`;
 void renderNow();
