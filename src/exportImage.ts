@@ -19,6 +19,7 @@ type StandaloneSvg = {
 type StandaloneSvgOptions = {
   paddingPx?: number;
   includeBackground?: boolean;
+  backgroundColor?: string;
   color?: string;
 };
 
@@ -92,7 +93,12 @@ function readRenderedSize(svg: SVGElement, fallbackBox: SvgBox): { width: number
 }
 
 function createStandaloneSvg(svg: SVGElement, options: StandaloneSvgOptions = {}): StandaloneSvg {
-  const { paddingPx = DEFAULT_PADDING_PX, includeBackground = false, color = '#111111' } = options;
+  const {
+    paddingPx = DEFAULT_PADDING_PX,
+    includeBackground = false,
+    backgroundColor = '#ffffff',
+    color = '#111111',
+  } = options;
   const source = svg.cloneNode(true) as SVGElement;
   const box = readSvgBox(svg);
   const renderedSize = readRenderedSize(svg, box);
@@ -121,7 +127,7 @@ function createStandaloneSvg(svg: SVGElement, options: StandaloneSvgOptions = {}
     background.setAttribute('y', String(viewBox.y));
     background.setAttribute('width', String(viewBox.width));
     background.setAttribute('height', String(viewBox.height));
-    background.setAttribute('fill', '#ffffff');
+    background.setAttribute('fill', backgroundColor);
     source.insertBefore(background, source.firstChild);
   }
 
@@ -173,21 +179,39 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-export function serializeSvg(svgElement: SVGElement, color = '#111111'): string {
-  return createStandaloneSvg(svgElement, { color }).text;
+export function serializeSvg(
+  svgElement: SVGElement,
+  color = '#111111',
+  includeBackground = false,
+  backgroundColor = '#ffffff',
+): string {
+  return createStandaloneSvg(svgElement, { color, includeBackground, backgroundColor }).text;
 }
 
-export function downloadSvg(svgElement: SVGElement, filename = SVG_FILENAME, color = '#111111'): void {
-  const svgText = serializeSvg(svgElement, color);
+export function downloadSvg(
+  svgElement: SVGElement,
+  filename = SVG_FILENAME,
+  color = '#111111',
+  includeBackground = false,
+  backgroundColor = '#ffffff',
+): void {
+  const svgText = serializeSvg(svgElement, color, includeBackground, backgroundColor);
   const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
   downloadBlob(blob, filename);
 }
 
-export async function createPngBlob(svgElement: SVGElement, scale = 1, color = '#111111'): Promise<Blob> {
+export async function createPngBlob(
+  svgElement: SVGElement,
+  scale = 1,
+  color = '#111111',
+  includeBackground = false,
+  backgroundColor = '#ffffff',
+): Promise<Blob> {
   const normalizedScale = [1, 2, 4].includes(scale) ? scale : 1;
   const standaloneSvg = createStandaloneSvg(svgElement, {
     color,
-    includeBackground: false,
+    includeBackground,
+    backgroundColor,
     paddingPx: DEFAULT_PADDING_PX,
   });
   const svgBlob = new Blob([standaloneSvg.text], { type: 'image/svg+xml;charset=utf-8' });
@@ -218,7 +242,9 @@ export async function downloadPng(
   filename = PNG_FILENAME,
   scale = 1,
   color = '#111111',
+  includeBackground = false,
+  backgroundColor = '#ffffff',
 ): Promise<void> {
-  const pngBlob = await createPngBlob(svgElement, scale, color);
+  const pngBlob = await createPngBlob(svgElement, scale, color, includeBackground, backgroundColor);
   downloadBlob(pngBlob, filename);
 }

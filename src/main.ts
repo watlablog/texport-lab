@@ -28,6 +28,7 @@ const downloadSvgButton = getElement('download-svg-button', HTMLButtonElement);
 const downloadPngButton = getElement('download-png-button', HTMLButtonElement);
 const fontColorInput = getElement('font-color-input', HTMLInputElement);
 const backgroundColorInput = getElement('background-color-input', HTMLInputElement);
+const includeBackgroundInput = getElement('include-background-input', HTMLInputElement);
 const preview = getElement('preview', HTMLDivElement);
 const message = getElement('message', HTMLParagraphElement);
 const renderState = getElement('render-state', HTMLDivElement);
@@ -353,6 +354,10 @@ function getSelectedBackgroundColor(): string {
   return backgroundColorInput.value || '#ffffff';
 }
 
+function shouldIncludeBackgroundInOutput(): boolean {
+  return includeBackgroundInput.checked;
+}
+
 function updatePreviewColors(): void {
   preview.style.setProperty('--preview-font-color', getSelectedFontColor());
   preview.style.setProperty('--preview-background-color', getSelectedBackgroundColor());
@@ -477,7 +482,13 @@ async function handlePngCopy(): Promise<void> {
   setMessage('Preparing PNG...');
 
   try {
-    const pngBlobPromise = createPngBlob(currentSvg, getSelectedPngScale(), getSelectedFontColor());
+    const pngBlobPromise = createPngBlob(
+      currentSvg,
+      getSelectedPngScale(),
+      getSelectedFontColor(),
+      shouldIncludeBackgroundInOutput(),
+      getSelectedBackgroundColor(),
+    );
     await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlobPromise })]);
     setMessage('PNG copied. Paste it with Ctrl+V or Command+V.', 'success');
   } catch (error) {
@@ -502,7 +513,14 @@ async function handlePngDownload(): Promise<void> {
   setMessage('Preparing PNG...');
 
   try {
-    await downloadPng(currentSvg, 'texport-equation.png', getSelectedPngScale(), getSelectedFontColor());
+    await downloadPng(
+      currentSvg,
+      'texport-equation.png',
+      getSelectedPngScale(),
+      getSelectedFontColor(),
+      shouldIncludeBackgroundInOutput(),
+      getSelectedBackgroundColor(),
+    );
     setMessage('PNG download started.', 'success');
   } catch (error) {
     setMessage(getErrorMessage(error), 'error');
@@ -518,7 +536,13 @@ function handleSvgDownload(): void {
   }
 
   try {
-    downloadSvg(currentSvg, 'texport-equation.svg', getSelectedFontColor());
+    downloadSvg(
+      currentSvg,
+      'texport-equation.svg',
+      getSelectedFontColor(),
+      shouldIncludeBackgroundInOutput(),
+      getSelectedBackgroundColor(),
+    );
     setMessage('SVG download started.', 'success');
   } catch (error) {
     setMessage(getErrorMessage(error), 'error');

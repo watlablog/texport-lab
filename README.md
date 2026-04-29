@@ -48,15 +48,16 @@ Clicking the same toolbar button on an already wrapped selection removes that wr
 Use the preview controls to adjust:
 
 - `font`: changes the rendered equation color. This color is included in SVG and PNG exports.
-- `background`: changes only the preview background. Exported SVG and PNG files keep a transparent background.
+- `background`: changes the preview background. Exported SVG and PNG files keep a transparent background unless `Apply background color to output` is enabled.
 - `1x / 2x / 4x`: changes the preview size and PNG export scale. The default is `2x`.
 
 ### Export
 
 - `Copy LaTeX`: copies the editor contents as text.
-- `Copy PNG`: copies a transparent-background PNG to the clipboard. This requires localhost or HTTPS and a browser with image clipboard support. iOS Safari may still block image clipboard writes in some contexts; use `PNG` download as the fallback when that happens.
-- `PNG`: downloads a transparent-background PNG.
-- `SVG`: downloads a transparent-background SVG.
+- `Copy PNG`: copies a PNG to the clipboard. This requires localhost or HTTPS and a browser with image clipboard support. iOS Safari may still block image clipboard writes in some contexts; use `PNG` download as the fallback when that happens.
+- `PNG`: downloads a PNG.
+- `SVG`: downloads an SVG.
+- `Apply background color to output`: includes the selected preview background color in copied PNG, downloaded PNG, and downloaded SVG output. Leave it unchecked for transparent output.
 
 ## Development
 
