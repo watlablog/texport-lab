@@ -54,7 +54,7 @@ Use the preview controls to adjust:
 ### Export
 
 - `Copy LaTeX`: copies the editor contents as text.
-- `Copy PNG`: copies a transparent-background PNG to the clipboard. This requires localhost or HTTPS and a browser with image clipboard support.
+- `Copy PNG`: copies a transparent-background PNG to the clipboard. This requires localhost or HTTPS and a browser with image clipboard support. iOS Safari may still block image clipboard writes in some contexts; use `PNG` download as the fallback when that happens.
 - `PNG`: downloads a transparent-background PNG.
 - `SVG`: downloads a transparent-background SVG.
 

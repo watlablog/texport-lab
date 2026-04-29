@@ -285,6 +285,26 @@ function getErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Unexpected error.';
 }
 
+function canWritePngToClipboard(): boolean {
+  return (
+    window.isSecureContext &&
+    Boolean(navigator.clipboard) &&
+    typeof navigator.clipboard.write === 'function' &&
+    typeof window.ClipboardItem === 'function' &&
+    (typeof ClipboardItem.supports !== 'function' || ClipboardItem.supports('image/png'))
+  );
+}
+
+function isClipboardPermissionError(error: unknown): boolean {
+  if (error instanceof DOMException && error.name === 'NotAllowedError') {
+    return true;
+  }
+
+  const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+
+  return message.includes('not allowed by the user agent') || message.includes('denied permission');
+}
+
 function setMessage(text: string, kind: 'info' | 'error' | 'success' = 'info'): void {
   message.textContent = text;
   message.dataset.kind = kind;
@@ -448,8 +468,8 @@ async function handlePngCopy(): Promise<void> {
     return;
   }
 
-  if (!window.isSecureContext || !navigator.clipboard || typeof navigator.clipboard.write !== 'function') {
-    setMessage('PNG clipboard copy requires localhost, HTTPS, and a compatible browser.', 'error');
+  if (!canWritePngToClipboard()) {
+    setMessage('PNG clipboard copy requires localhost, HTTPS, and a browser with image clipboard support. Use PNG download as a fallback.', 'error');
     return;
   }
 
@@ -457,10 +477,15 @@ async function handlePngCopy(): Promise<void> {
   setMessage('Preparing PNG...');
 
   try {
-    const pngBlob = await createPngBlob(currentSvg, getSelectedPngScale(), getSelectedFontColor());
-    await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlob })]);
+    const pngBlobPromise = createPngBlob(currentSvg, getSelectedPngScale(), getSelectedFontColor());
+    await navigator.clipboard.write([new ClipboardItem({ 'image/png': pngBlobPromise })]);
     setMessage('PNG copied. Paste it with Ctrl+V or Command+V.', 'success');
   } catch (error) {
+    if (isClipboardPermissionError(error)) {
+      setMessage('PNG clipboard copy was blocked by this browser. On iOS Safari, use the PNG download button instead.', 'error');
+      return;
+    }
+
     setMessage(getErrorMessage(error), 'error');
   } finally {
     copyPngButton.disabled = currentSvg === null;
