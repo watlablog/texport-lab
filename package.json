@@ -1,6 +1,6 @@
 {
   "name": "texport",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "description": "A static web app for rendering LaTeX equations with MathJax and exporting them as SVG or PNG images.",
   "type": "module",
