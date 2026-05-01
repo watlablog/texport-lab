@@ -960,12 +960,32 @@ h2 {
   }
 
   .support-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex: 1 1 100%;
     width: 100%;
-    justify-content: space-between;
+    min-width: 0;
+    max-width: 100%;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 18px;
     white-space: normal;
   }
 
-  .support-links span {
+  .support-links > span {
+    grid-column: 1 / -1;
+  }
+
+  .support-links a {
+    width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 28px;
+    padding: 0 8px;
+  }
+
+  .support-links span,
+  .support-links a span {
     min-width: 0;
   }
 
@@ -1032,5 +1052,11 @@ h2 {
 
   .sample-preview {
     min-height: 74px;
+  }
+}
+
+@media (max-width: 360px) {
+  .support-links {
+    grid-template-columns: 1fr;
   }
 }
